@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AdminAuthProvider, useAdminAuth } from './contexts/AdminAuthContext';
 import Auth from './components/Auth';
 import RegionSelector from './components/RegionSelector';
 import ImageUpload from './components/ImageUpload';
@@ -8,6 +10,15 @@ import GPSMap from './components/GPSMap';
 import Charts from './components/Charts';
 import ReGenInsight from './components/ReGenInsight';
 import BlockchainLedger from './components/BlockchainLedger';
+import AdminLogin from './components/AdminLogin';
+import ChiefAdminDashboard from './components/ChiefAdminDashboard';
+import SubAdminDashboard from './components/SubAdminDashboard';
+import AdminCommunication from './components/AdminCommunication';
+import ContactInfo from './components/ContactInfo';
+import MostLikedImages from './components/MostLikedImages';
+import UserSupport from './components/UserSupport';
+import Notifications from './components/Notifications';
+
 import {
   Satellite,
   LayoutDashboard,
@@ -19,7 +30,11 @@ import {
   LogOut,
   UserCircle,
   Menu,
-  X
+  X,
+  Heart,
+  Phone,
+  HelpCircle,
+  Bell
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import './App.css';
@@ -30,6 +45,8 @@ function AppContent() {
   const [showAuth, setShowAuth] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isGuest, logout } = useAuth();
+  const { admin, logoutAdmin, loading: adminLoading } = useAdminAuth();
+  const location = useLocation();
 
   useEffect(() => {
     // Register service worker for PWA
@@ -40,13 +57,37 @@ function AppContent() {
     }
   }, []);
 
+  // Determine if we are on an admin page
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  if (isAdminRoute) {
+    if (adminLoading) {
+      return <div className="flex items-center justify-center min-h-screen text-lg">Loading Admin Panel...</div>;
+    }
+    if (!admin) {
+      return <AdminLogin />;
+    }
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <Routes>
+          <Route path="/admin" element={admin.role === 'chief' ? <ChiefAdminDashboard /> : <SubAdminDashboard />} />
+          <Route path="/admin/communication" element={<AdminCommunication />} />
+          {/* Add other admin routes here if needed */}
+        </Routes>
+      </div>
+    );
+  }
+
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'map', label: 'GPS Map', icon: Map },
     { id: 'charts', label: 'Analytics', icon: BarChart3 },
     { id: 'images', label: 'Community Images', icon: ImageIcon },
+    { id: 'most-liked', label: 'Most Liked', icon: Heart },
     { id: 'regen', label: 'ReGen Insight', icon: Brain },
-    { id: 'blockchain', label: 'Blockchain', icon: Shield }
+    { id: 'blockchain', label: 'Blockchain', icon: Shield },
+    { id: 'contact', label: 'Contact Info', icon: Phone },
+    { id: 'support', label: 'Support', icon: HelpCircle }
   ];
 
   return (
@@ -57,13 +98,15 @@ function AppContent() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                <Satellite className="w-7 h-7 text-green-600" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">ReGen Insight</h1>
-                <p className="text-xs text-green-100">Regenerative Intelligence Platform</p>
-              </div>
+              <Link to="/" className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                  <Satellite className="w-7 h-7 text-green-600" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">ReGen Insight</h1>
+                  <p className="text-xs text-green-100">Regenerative Intelligence Platform</p>
+                </div>
+              </Link>
             </div>
 
             {/* Desktop Navigation */}
@@ -78,6 +121,7 @@ function AppContent() {
                   if (activeTab !== 'images') setActiveTab('images');
                 }}
               />
+              <Notifications userId={user?.id || 'guest'} isAdmin={false} />
               {isGuest ? (
                 <Button
                   onClick={() => setShowAuth(true)}
@@ -125,6 +169,7 @@ function AppContent() {
                   if (activeTab !== 'images') setActiveTab('images');
                 }}
               />
+              <Notifications userId={user?.id || 'guest'} isAdmin={false} />
               {isGuest ? (
                 <Button
                   onClick={() => setShowAuth(true)}
@@ -228,8 +273,11 @@ function AppContent() {
         {activeTab === 'map' && <GPSMap selectedRegion={selectedRegion} />}
         {activeTab === 'charts' && <Charts selectedRegion={selectedRegion} />}
         {activeTab === 'images' && <ImageGallery selectedRegion={selectedRegion} />}
+        {activeTab === 'most-liked' && <MostLikedImages />}
         {activeTab === 'regen' && <ReGenInsight selectedRegion={selectedRegion} />}
         {activeTab === 'blockchain' && <BlockchainLedger selectedRegion={selectedRegion} />}
+        {activeTab === 'contact' && <ContactInfo />}
+        {activeTab === 'support' && <UserSupport />}
       </main>
 
       {/* Footer */}
@@ -278,9 +326,13 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <AdminAuthProvider>
+          <AppContent />
+        </AdminAuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
