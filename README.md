@@ -1,5 +1,5 @@
 # RayGen Insight - Regenerative Intelligence Platform
-
+Live URL: https://regeninsight-9takto.manus.space
 ## 🏆 Project Overview
 
 *RayGen Insight* is an AI-powered, blockchain-verified environmental intelligence platform designed to monitor, restore, and sustain Kenya’s natural ecosystems.  
