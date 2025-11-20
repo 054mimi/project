@@ -214,7 +214,7 @@ npm run build
 
 ## 🏆 Achievements
 
-- 🌍 Coverage of **all 47 Kenyan counties** with environmental data  
+- 🌍 Coverage of **all 47 Kenyan counties** with environmental data (sooner or later😁) 
 - 🤖 Integrated AI + GIS + Blockchain ecosystem  
 - ⚡ Real-time analytics with <3s load time  
 - 🧩 Modular, scalable, and open-source architecture  
@@ -244,7 +244,8 @@ npm run build
 
 **Development Team:**  
 - [Young Kibebe](https://github.com/054mimi) – Lead Developer, System Architect  
-- [Rachael Kiarie](https://github.com/raykiarie123-alt) – UI/UX Design, Frontend Developer  
+- [Rachael Kiarie](https://github.com/raykiarie123-alt) – UI/UX Design, Frontend Developer
+- [Samuel Wambuu](https://github.com/DeeCruzz-254)
 
 **Special Thanks:**  
 - PLP Community for support and inspiration  
