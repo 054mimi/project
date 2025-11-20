@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { AdminAuthProvider, useAdminAuth } from './contexts/AdminAuthContext';
-import Auth from './components/Auth';
-import RegionSelector from './components/RegionSelector';
-import ImageUpload from './components/ImageUpload';
-import ImageGallery from './components/ImageGallery';
-import GPSMap from './components/GPSMap';
-import Charts from './components/Charts';
-import ReGenInsight from './components/ReGenInsight';
-import BlockchainLedger from './components/BlockchainLedger';
-import AdminLogin from './components/AdminLogin';
-import ChiefAdminDashboard from './components/ChiefAdminDashboard';
-import SubAdminDashboard from './components/SubAdminDashboard';
-import AdminCommunication from './components/AdminCommunication';
-import ContactInfo from './components/ContactInfo';
-import MostLikedImages from './components/MostLikedImages';
-import UserSupport from './components/UserSupport';
-import Notifications from './components/Notifications';
+import { AuthProvider, useAuth } from './AuthContext';
+import { AdminAuthProvider, useAdminAuth } from './AdminAuthContext';
+import Auth from './Auth';
+import RegionSelector from './RegionSelector';
+import ImageUpload from './ImageUpload';
+import ImageGallery from './ImageGallery';
+import GPSMap from './GPSMap';
+import Charts from './Charts';
+import ReGenInsight from './ReGenInsight';
+import BlockchainLedger from './BlockchainLedger';
+import AdminLogin from './AdminLogin';
+import ChiefAdminDashboard from './ChiefAdminDashboard';
+import SubAdminDashboard from './SubAdminDashboard';
+import AdminCommunication from './AdminCommunication';
+import ContactInfo from './ContactInfo';
+import MostLikedImages from './MostLikedImages';
+import UserSupport from './UserSupport';
+import Notifications from './Notifications';
 
 import {
   Satellite,
@@ -36,7 +36,6 @@ import {
   HelpCircle,
   Bell
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import './App.css';
 
 function AppContent() {
@@ -123,26 +122,25 @@ function AppContent() {
               />
               <Notifications userId={user?.id || 'guest'} isAdmin={false} />
               {isGuest ? (
-                <Button
+                <button
                   onClick={() => setShowAuth(true)}
-                  className="bg-white text-green-600 hover:bg-green-50"
+                  className="bg-white text-green-600 hover:bg-green-50 px-4 py-2 rounded flex items-center"
                 >
                   <UserCircle className="w-5 h-5 mr-2" />
                   Sign In
-                </Button>
+                </button>
               ) : (
                 <div className="flex items-center gap-3">
                   <div className="text-white text-right">
                     <p className="font-semibold">{user?.name}</p>
                     <p className="text-xs text-green-100">{user?.email}</p>
                   </div>
-                  <Button
+                  <button
                     onClick={logout}
-                    variant="outline"
-                    className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+                    className="bg-white/20 border border-white/30 text-white hover:bg-white/30 px-3 py-1 rounded flex items-center"
                   >
                     <LogOut className="w-4 h-4" />
-                  </Button>
+                  </button>
                 </div>
               )}
             </div>
@@ -171,27 +169,26 @@ function AppContent() {
               />
               <Notifications userId={user?.id || 'guest'} isAdmin={false} />
               {isGuest ? (
-                <Button
+                <button
                   onClick={() => setShowAuth(true)}
-                  className="w-full bg-white text-green-600 hover:bg-green-50"
+                  className="w-full bg-white text-green-600 hover:bg-green-50 px-4 py-2 rounded flex items-center justify-center"
                 >
                   <UserCircle className="w-5 h-5 mr-2" />
                   Sign In
-                </Button>
+                </button>
               ) : (
                 <div className="space-y-2">
                   <div className="bg-white/20 rounded-lg p-3 text-white">
                     <p className="font-semibold">{user?.name}</p>
                     <p className="text-xs text-green-100">{user?.email}</p>
                   </div>
-                  <Button
+                  <button
                     onClick={logout}
-                    variant="outline"
-                    className="w-full bg-white/20 border-white/30 text-white hover:bg-white/30"
+                    className="w-full bg-white/20 border border-white/30 text-white hover:bg-white/30 px-4 py-2 rounded flex items-center justify-center"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign Out
-                  </Button>
+                  </button>
                 </div>
               )}
             </div>

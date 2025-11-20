@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { counties } from '../data/counties';
+import { useAuth } from './AuthContext';
+import { counties } from './counties';
 import { UserCircle, Mail, Lock, MapPin, LogIn, UserPlus, Users } from 'lucide-react';
 
 const Auth = ({ onClose }) => {
@@ -149,9 +148,9 @@ const Auth = ({ onClose }) => {
             </div>
           )}
 
-          <Button
+          <button
             type="submit"
-            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-2 rounded-lg font-semibold transition-all duration-200"
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-2 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center"
           >
             {isLogin ? (
               <>
@@ -164,7 +163,7 @@ const Auth = ({ onClose }) => {
                 Create Account
               </>
             )}
-          </Button>
+          </button>
         </form>
 
         {/* Toggle Login/Signup */}
@@ -190,14 +189,13 @@ const Auth = ({ onClose }) => {
               <span className="px-2 bg-white text-gray-500">Or</span>
             </div>
           </div>
-          <Button
+          <button
             onClick={handleGuestAccess}
-            variant="outline"
-            className="w-full mt-4 border-2 border-gray-300 hover:border-green-500 hover:bg-green-50"
+            className="w-full mt-4 border-2 border-gray-300 hover:border-green-500 hover:bg-green-50 py-2 rounded-lg flex items-center justify-center"
           >
             <Users className="w-5 h-5 mr-2" />
             Continue as Guest
-          </Button>
+          </button>
         </div>
       </div>
     </div>

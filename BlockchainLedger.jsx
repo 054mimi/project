@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { counties } from '../data/counties';
+import { counties } from '@/data/counties';
 import {
   Shield,
   CheckCircle,

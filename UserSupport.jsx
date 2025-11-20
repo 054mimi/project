@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useAdminAuth } from '../contexts/AdminAuthContext';
-import { counties } from '../data/counties';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { counties } from '@/data/counties';
 import {
   MessageSquare,
   Send,

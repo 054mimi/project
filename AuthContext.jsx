@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+const API_BASE = 'http://localhost:5000/api';
 
 const AuthContext = createContext(null);
 
@@ -16,62 +17,63 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored user data
+    // Check for stored token and user data
+    const token = localStorage.getItem('regenToken');
     const storedUser = localStorage.getItem('regenUser');
-    if (storedUser) {
+    if (token && storedUser) {
       setUser(JSON.parse(storedUser));
       setIsGuest(false);
     }
     setLoading(false);
   }, []);
 
-  const login = (email, password) => {
-    // Simulate login - in production, this would call an API
-    const users = JSON.parse(localStorage.getItem('regenUsers') || '[]');
-    const foundUser = users.find(u => u.email === email && u.password === password);
-    
-    if (foundUser) {
-      const userWithoutPassword = { ...foundUser };
-      delete userWithoutPassword.password;
-      setUser(userWithoutPassword);
-      setIsGuest(false);
-      localStorage.setItem('regenUser', JSON.stringify(userWithoutPassword));
-      return { success: true };
+  const login = async (email, password) => {
+    try {
+      const response = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setUser(data.user);
+        setIsGuest(false);
+        localStorage.setItem('regenToken', data.token);
+        localStorage.setItem('regenUser', JSON.stringify(data.user));
+        return { success: true };
+      }
+      return { success: false, error: data.error };
+    } catch (err) {
+      return { success: false, error: 'Network error' };
     }
-    return { success: false, error: 'Invalid credentials' };
   };
 
-  const signup = (userData) => {
-    // Simulate signup - in production, this would call an API
-    const users = JSON.parse(localStorage.getItem('regenUsers') || '[]');
-    
-    // Check if user already exists
-    if (users.find(u => u.email === userData.email)) {
-      return { success: false, error: 'User already exists' };
+  const signup = async (userData) => {
+    try {
+      const response = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData)
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setUser(data.user);
+        setIsGuest(false);
+        localStorage.setItem('regenToken', data.token);
+        localStorage.setItem('regenUser', JSON.stringify(data.user));
+        return { success: true };
+      }
+      return { success: false, error: data.error };
+    } catch (err) {
+      return { success: false, error: 'Network error' };
     }
-
-    const newUser = {
-      id: Date.now().toString(),
-      ...userData,
-      createdAt: new Date().toISOString()
-    };
-
-    users.push(newUser);
-    localStorage.setItem('regenUsers', JSON.stringify(users));
-
-    const userWithoutPassword = { ...newUser };
-    delete userWithoutPassword.password;
-    setUser(userWithoutPassword);
-    setIsGuest(false);
-    localStorage.setItem('regenUser', JSON.stringify(userWithoutPassword));
-    
-    return { success: true };
   };
 
   const logout = () => {
     setUser(null);
     setIsGuest(true);
     localStorage.removeItem('regenUser');
+    localStorage.removeItem('regenToken');
   };
 
   const continueAsGuest = () => {
@@ -79,11 +81,24 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const switchRegion = (countyId) => {
+  const switchRegion = async (countyId) => {
     if (user) {
-      const updatedUser = { ...user, currentRegion: countyId };
-      setUser(updatedUser);
-      localStorage.setItem('regenUser', JSON.stringify(updatedUser));
+      const token = localStorage.getItem('regenToken');
+      try {
+        await fetch(`${API_BASE}/auth/region`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ countyId })
+        });
+        const updatedUser = { ...user, currentRegion: countyId };
+        setUser(updatedUser);
+        localStorage.setItem('regenUser', JSON.stringify(updatedUser));
+      } catch (err) {
+        console.error('Failed to update region');
+      }
     }
   };
 

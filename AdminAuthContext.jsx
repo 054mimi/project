@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+const API_BASE = 'http://localhost:5000/api';
 
 const AdminAuthContext = createContext(null);
 
@@ -15,47 +16,39 @@ export const AdminAuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize chief admin if not exists
-    const admins = JSON.parse(localStorage.getItem('regenAdmins') || '[]');
-    if (admins.length === 0) {
-      const chiefAdmin = {
-        id: 'chief-admin',
-        email: 'chief.raydun@gmail.com',
-        password: 'ChiefAdmin@2025', // In production, this should be hashed
-        role: 'chief',
-        name: 'Chief Administrator',
-        countyId: null, // Chief admin has access to all counties
-        createdAt: new Date().toISOString()
-      };
-      admins.push(chiefAdmin);
-      localStorage.setItem('regenAdmins', JSON.stringify(admins));
-    }
-
     // Check for stored admin session
+    const token = localStorage.getItem('regenAdminToken');
     const storedAdmin = localStorage.getItem('regenAdminSession');
-    if (storedAdmin) {
+    if (token && storedAdmin) {
       setAdmin(JSON.parse(storedAdmin));
     }
     setLoading(false);
   }, []);
 
-  const loginAdmin = (email, password) => {
-    const admins = JSON.parse(localStorage.getItem('regenAdmins') || '[]');
-    const foundAdmin = admins.find(a => a.email === email && a.password === password);
-    
-    if (foundAdmin) {
-      const adminWithoutPassword = { ...foundAdmin };
-      delete adminWithoutPassword.password;
-      setAdmin(adminWithoutPassword);
-      localStorage.setItem('regenAdminSession', JSON.stringify(adminWithoutPassword));
-      return { success: true };
+  const loginAdmin = async (email, password) => {
+    try {
+      const response = await fetch(`${API_BASE}/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setAdmin(data.admin);
+        localStorage.setItem('regenAdminToken', data.token);
+        localStorage.setItem('regenAdminSession', JSON.stringify(data.admin));
+        return { success: true };
+      }
+      return { success: false, error: data.error };
+    } catch (err) {
+      return { success: false, error: 'Network error' };
     }
-    return { success: false, error: 'Invalid admin credentials' };
   };
 
   const logoutAdmin = () => {
     setAdmin(null);
     localStorage.removeItem('regenAdminSession');
+    localStorage.removeItem('regenAdminToken');
   };
 
   const createSubAdmin = (subAdminData) => {

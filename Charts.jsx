@@ -1,5 +1,5 @@
 import React from 'react';
-import { counties, generateMonthlyData, getAnnualWaterStressData } from '../data/counties';
+import { counties, generateMonthlyData, getAnnualWaterStressData } from './counties';
 import {
   BarChart,
   Bar,

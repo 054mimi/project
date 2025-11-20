@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAdminAuth } from '../contexts/AdminAuthContext';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { Button } from '@/components/ui/button';
 import { Shield, Mail, Lock, AlertCircle } from 'lucide-react';
 

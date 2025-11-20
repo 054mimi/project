@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useAdminAuth } from '../contexts/AdminAuthContext';
-import { counties } from '../data/counties';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { counties } from '@/data/counties';
+// inside ContactInfo.jsx (top)
+import { getSubAdminByCounty } from '@/services/adminService';
 import { Phone, Mail, MapPin, Shield, AlertCircle } from 'lucide-react';
 
 const ContactInfo = () => {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { counties } from '../data/counties';
+import { counties } from '@/data/counties';
 import {
   Brain,
   TreePine,
@@ -58,6 +58,7 @@ const ReGenInsight = ({ selectedRegion }) => {
     );
   }
 
+  const imagesList = images ?? []; // safe fallback if images is undefined
   return (
     <div className="space-y-6">
       {/* Header */}

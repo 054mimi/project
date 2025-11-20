@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { counties } from '../data/counties';
+import { counties } from './counties';
 import { MapPin, User, Calendar, MessageSquare, Heart, CheckCircle, Image as ImageIcon } from 'lucide-react';
+const API_BASE = 'http://localhost:5000/api';
 
 const ImageGallery = ({ selectedRegion }) => {
   const [images, setImages] = useState([]);
@@ -10,44 +11,48 @@ const ImageGallery = ({ selectedRegion }) => {
     loadImages();
   }, [selectedRegion]);
 
-  const loadImages = () => {
-    const allUploads = JSON.parse(localStorage.getItem('regenUploads') || '[]');
-    const regionImages = allUploads.filter(img => img.countyId === selectedRegion);
-    setImages(regionImages.reverse()); // Show newest first
+  const loadImages = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/images/county/${selectedRegion}`);
+      if (response.ok) {
+        const regionImages = await response.json();
+        setImages(regionImages);
+      }
+    } catch (err) {
+      console.error('Failed to load images');
+    }
   };
 
-  const handleLike = (imageId) => {
-    const userId = localStorage.getItem('regenUser') ? JSON.parse(localStorage.getItem('regenUser')).id : 'guest';
-    const likedImages = JSON.parse(localStorage.getItem('userLikedImages') || '{}');
-    const userLikes = likedImages[userId] || [];
+  const handleLike = async (imageId) => {
+    const user = JSON.parse(localStorage.getItem('regenUser'));
+    if (!user) return;
 
-    const allUploads = JSON.parse(localStorage.getItem('regenUploads') || '[]');
-    const updated = allUploads.map(img => {
-      if (img.id === imageId) {
-        const hasLiked = userLikes.includes(imageId);
-        if (hasLiked) {
-          // Unlike
-          likedImages[userId] = userLikes.filter(id => id !== imageId);
-          return { ...img, likes: Math.max(0, (img.likes || 0) - 1) };
-        } else {
-          // Like
-          likedImages[userId] = [...userLikes, imageId];
-          return { ...img, likes: (img.likes || 0) + 1 };
+    try {
+      const token = localStorage.getItem('regenToken');
+      const response = await fetch(`${API_BASE}/images/${imageId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ userId: user.id })
+      });
+
+      if (response.ok) {
+        const updatedImage = await response.json();
+        setImages(images.map(img => img._id === imageId ? updatedImage : img));
+        if (selectedImage && selectedImage._id === imageId) {
+          setSelectedImage(updatedImage);
         }
       }
-      return img;
-    });
-    
-    localStorage.setItem('regenUploads', JSON.stringify(updated));
-    localStorage.setItem('userLikedImages', JSON.stringify(likedImages));
-    loadImages();
+    } catch (err) {
+      console.error('Failed to like image');
+    }
   };
 
-  const hasUserLiked = (imageId) => {
-    const userId = localStorage.getItem('regenUser') ? JSON.parse(localStorage.getItem('regenUser')).id : 'guest';
-    const likedImages = JSON.parse(localStorage.getItem('userLikedImages') || '{}');
-    const userLikes = likedImages[userId] || [];
-    return userLikes.includes(imageId);
+  const hasUserLiked = (image) => {
+    const user = JSON.parse(localStorage.getItem('regenUser'));
+    return user && image.likedBy && image.likedBy.includes(user.id);
   };
 
   const county = counties.find(c => c.id === selectedRegion);
@@ -82,14 +87,14 @@ const ImageGallery = ({ selectedRegion }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {images.map((image) => (
             <div
-              key={image.id}
+              key={image._id}
               className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-200 cursor-pointer"
               onClick={() => setSelectedImage(image)}
             >
               {/* Image */}
               <div className="relative h-48 bg-gray-100">
                 <img
-                  src={image.preview}
+                  src={`http://localhost:5000${image.imageUrl}`}
                   alt={image.location}
                   className="w-full h-full object-cover"
                 />
@@ -126,15 +131,15 @@ const ImageGallery = ({ selectedRegion }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleLike(image.id);
+                      handleLike(image._id);
                     }}
                     className={`flex items-center gap-1 text-sm transition-colors ${
-                      hasUserLiked(image.id)
+                      hasUserLiked(image)
                         ? 'text-red-500 hover:text-red-600'
                         : 'text-gray-500 hover:text-red-500'
                     }`}
                   >
-                    <Heart className={`w-4 h-4 ${hasUserLiked(image.id) ? 'fill-current' : ''}`} />
+                    <Heart className={`w-4 h-4 ${hasUserLiked(image) ? 'fill-current' : ''}`} />
                     <span>{image.likes || 0}</span>
                   </button>
                 </div>
@@ -161,7 +166,7 @@ const ImageGallery = ({ selectedRegion }) => {
           >
             <div className="relative">
               <img
-                src={selectedImage.preview}
+                src={`http://localhost:5000${selectedImage.imageUrl}`}
                 alt={selectedImage.location}
                 className="w-full h-auto max-h-[60vh] object-contain bg-gray-100"
               />
@@ -200,16 +205,16 @@ const ImageGallery = ({ selectedRegion }) => {
                   <span className="text-sm">{new Date(selectedImage.timestamp).toLocaleString()}</span>
                 </div>
                 <button
-                  onClick={() => handleLike(selectedImage.id)}
+                  onClick={() => handleLike(selectedImage._id)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                    hasUserLiked(selectedImage.id)
+                    hasUserLiked(selectedImage)
                       ? 'bg-red-500 hover:bg-red-600 text-white'
                       : 'bg-red-50 hover:bg-red-100 text-red-600'
                   }`}
                 >
-                  <Heart className={`w-5 h-5 ${hasUserLiked(selectedImage.id) ? 'fill-current' : ''}`} />
+                  <Heart className={`w-5 h-5 ${hasUserLiked(selectedImage) ? 'fill-current' : ''}`} />
                   <span className="font-semibold">
-                    {hasUserLiked(selectedImage.id) ? 'Unlike' : 'Like'} ({selectedImage.likes || 0})
+                    {hasUserLiked(selectedImage) ? 'Unlike' : 'Like'} ({selectedImage.likes || 0})
                   </span>
                 </button>
               </div>

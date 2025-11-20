@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { counties } from '../data/counties';
+import { useAuth } from './AuthContext';
+import { counties } from './counties';
 import { Camera, MapPin, Upload, X, CheckCircle, AlertCircle, Image as ImageIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+const API_BASE = 'http://localhost:5000/api';
 
 const ImageUpload = ({ selectedRegion, onUploadSuccess }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,7 +26,7 @@ const ImageUpload = ({ selectedRegion, onUploadSuccess }) => {
     setSelectedFiles(selectedFiles.filter(f => f.id !== id));
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (isGuest) {
       alert('Please sign in to upload images');
       return;
@@ -44,50 +44,61 @@ const ImageUpload = ({ selectedRegion, onUploadSuccess }) => {
 
     setUploading(true);
 
-    // Simulate upload delay
-    setTimeout(() => {
-      const county = counties.find(c => c.id === selectedRegion);
-      const uploads = selectedFiles.map(fileObj => ({
-        id: Date.now() + Math.random(),
-        userId: user.id,
-        userName: user.name,
-        countyId: selectedRegion,
-        countyName: county?.name || 'Unknown',
-        location: location,
-        comment: comment,
-        timestamp: new Date().toISOString(),
-        verified: true,
-        likes: 0,
-        preview: fileObj.preview
-      }));
+    const county = counties.find(c => c.id === selectedRegion);
+    const formData = new FormData();
+    formData.append('userId', user.id);
+    formData.append('userName', user.name);
+    formData.append('countyId', selectedRegion);
+    formData.append('countyName', county?.name || 'Unknown');
+    formData.append('location', location);
+    formData.append('comment', comment);
 
-      // Store in localStorage
-      const existingUploads = JSON.parse(localStorage.getItem('regenUploads') || '[]');
-      localStorage.setItem('regenUploads', JSON.stringify([...existingUploads, ...uploads]));
+    selectedFiles.forEach(fileObj => {
+      formData.append('images', fileObj.file);
+    });
 
-      setUploading(false);
-      setIsOpen(false);
-      setSelectedFiles([]);
-      setLocation('');
-      setComment('');
+    try {
+      const token = localStorage.getItem('regenToken');
+      const response = await fetch(`${API_BASE}/images/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
 
-      if (onUploadSuccess) {
-        onUploadSuccess(uploads);
+      if (response.ok) {
+        const uploads = await response.json();
+        setUploading(false);
+        setIsOpen(false);
+        setSelectedFiles([]);
+        setLocation('');
+        setComment('');
+
+        if (onUploadSuccess) {
+          onUploadSuccess(uploads);
+        }
+      } else {
+        alert('Upload failed');
+        setUploading(false);
       }
-    }, 1500);
+    } catch (err) {
+      alert('Network error');
+      setUploading(false);
+    }
   };
 
   const county = counties.find(c => c.id === selectedRegion);
 
   return (
     <>
-      <Button
+      <button
         onClick={() => setIsOpen(true)}
         className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-lg transition-all duration-200"
       >
         <Camera className="w-5 h-5" />
         Upload Image
-      </Button>
+      </button>
 
       {isOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -204,17 +215,16 @@ const ImageUpload = ({ selectedRegion, onUploadSuccess }) => {
 
             {/* Action Buttons */}
             <div className="flex gap-3">
-              <Button
+              <button
                 onClick={() => setIsOpen(false)}
-                variant="outline"
-                className="flex-1"
+                className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50"
               >
                 Cancel
-              </Button>
-              <Button
+              </button>
+              <button
                 onClick={handleUpload}
                 disabled={isGuest || uploading || selectedFiles.length === 0}
-                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white"
+                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-2 px-4 rounded-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {uploading ? (
                   <>
@@ -227,7 +237,7 @@ const ImageUpload = ({ selectedRegion, onUploadSuccess }) => {
                     Upload {selectedFiles.length} {selectedFiles.length === 1 ? 'Image' : 'Images'}
                   </>
                 )}
-              </Button>
+              </button>
             </div>
           </div>
         </div>

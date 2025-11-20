@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { counties } from '../data/counties';
+import { useAuth } from '@/contexts/AuthContext';
+import { counties } from '@/data/counties';
 import { MapPin, ChevronDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const RegionSelector = ({ selectedRegion, onRegionChange }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth() ?? {}; // safe destructure
   const [searchTerm, setSearchTerm] = useState('');
-  const { user, switchRegion } = useAuth();
+  const currentCounty = counties.find(c => c.id === selectedRegion);
 
   const filteredCounties = counties.filter(county =>
     county.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -21,8 +22,6 @@ const RegionSelector = ({ selectedRegion, onRegionChange }) => {
     setIsOpen(false);
     setSearchTerm('');
   };
-
-  const currentCounty = counties.find(c => c.id === selectedRegion);
 
   return (
     <div className="relative">

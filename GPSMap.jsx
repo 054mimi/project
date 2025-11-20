@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { counties } from '../data/counties';
+import { counties } from '@/data/counties';
 import { MapPin, Navigation, Satellite, Droplets, TreePine, AlertTriangle, Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -47,13 +47,20 @@ const GPSMap = ({ selectedRegion }) => {
   }, []);
 
   const getMapUrl = (lat, lon, zoom = 12) => {
-    // Using OpenStreetMap tile server for satellite-like view
-    // In production, you would use Google Maps API, Mapbox, or similar
     return `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.1},${lat-0.1},${lon+0.1},${lat+0.1}&layer=mapnik&marker=${lat},${lon}`;
   };
 
-  const displayLat = userLocation?.lat || county?.coords.lat || -1.2921;
-  const displayLon = userLocation?.lon || county?.coords.lon || 36.8219;
+  // ===== SAFE COORDS (patched) =====
+  const DEFAULT_LAT = -1.2921;
+  const DEFAULT_LON = 36.8219;
+
+  // Use optional chaining for county.coords and ensure numeric fallbacks
+  let displayLat = Number(userLocation?.lat ?? county?.coords?.lat ?? DEFAULT_LAT);
+  let displayLon = Number(userLocation?.lon ?? county?.coords?.lon ?? DEFAULT_LON);
+
+  if (!Number.isFinite(displayLat)) displayLat = DEFAULT_LAT;
+  if (!Number.isFinite(displayLon)) displayLon = DEFAULT_LON;
+  // ==================================
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
