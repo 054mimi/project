@@ -1,0 +1,53 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Vite / build outputs
+dist/
+build/
+.vite/
+
+# Environment
+.env
+.env.*.local
+
+# Logs
+*.log
+
+# Test / coverage
+coverage/
+coverage/**
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor/IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.vscode-test
+.history/
+
+# Misc
+*.local
+*.tgz
+*.swp
+*.swo
+
+# Caches
+.cache/
+.cache-loader/
+
+# Service worker / PWA artifacts (optional)
+# public/sw.js
+# public/worker-*.js
+
+# Ignore editor temp files created by Windows
+ehthumbs.db
